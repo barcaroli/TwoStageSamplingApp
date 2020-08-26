@@ -17,7 +17,7 @@
 #' @importFrom stats complete.cases
 #'
 #' @export
-suso_samplingApp<-function(launch.browser = T, quiet = T) {
+TwoStageSamplingApp<-function(launch.browser = T, quiet = T) {
   require(ReGenesees)
   require(sampling)
   require(magrittr)
@@ -26,9 +26,9 @@ suso_samplingApp<-function(launch.browser = T, quiet = T) {
   require(plyr)
   require(ggplot2)
   fp<-file.path('sampling', 'suso_sampling')
-  appFlex <- system.file(fp, "twostage_main.Rmd", package = "R2BEATapp")
+  appFlex <- system.file(fp, "twostage_main.Rmd", package = "TwoStageSamplingApp")
   if (appFlex == "") {
-    stop("Could not find example directory. Try re-installing `R2BEATapp`.", call. = FALSE)
+    stop("Could not find example directory. Try re-installing `TwoStageSamplingApp`.", call. = FALSE)
   }
   rmarkdown::run(appFlex, shiny_args = list(launch.browser, quiet))
 }
