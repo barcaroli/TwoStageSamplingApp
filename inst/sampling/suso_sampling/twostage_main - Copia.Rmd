@@ -1,0 +1,271 @@
+---
+title: "Two-stage Sampling Design Optimization with R2BEAT"
+author: "Michael Wild and Giulio Barcaroli"
+runtime: shiny
+output: 
+  flexdashboard::flex_dashboard:
+              storyboard: true
+              social: menu
+              source_code: embed
+              theme: spacelab
+---
+
+ 
+
+```{r setup, include=FALSE}
+## options
+options(future.globals.maxSize=10000*1024^2)
+options(java.parameters = "- Xmx5g")
+options(shiny.maxRequestSize=6000*1024^2)
+## styles
+smTab<-list(dom="tp")
+
+```
+
+```{css}
+.sbframe-commentary .flexfill-container {
+  width: 500px important!;
+}
+```
+
+Column {.sidebar data-width=300}
+-----------------------------------------------------------------------
+
+
+
+```{r}
+radioButtons("methodselect", "Select Approach", choices = c("R2BEAT"=1), selected = 1, inline = T)
+## 1. Design Upload
+h3("Design object")
+h5("Only .RData!")
+helpText("This is the result of the use",br(),
+         "of ReGenesees function 'svydesign' ", br(),
+         "applied to a previous round of the survey.")
+loadFileInput(id = "desList",label = "Upload Design Data", accept = (c(".RData")))
+des <<- callModule(loadFile, "desList")
+
+## 2. Calibrated Upload
+h3("Calibrated object")
+h5("Only .RData!")
+helpText("This is the result of the use",br(),
+         "of ReGenesees function 'svycal' ", br(),
+         "applied to a previous round of the survey.", br(),
+         "N.B.: if the calibrated object does not exist,", br(),
+         "      then reload the design object.")
+loadFileInput(id = "calFile",label = "Upload Calibrated Data", accept = (c(".RData")))
+cal <- callModule(loadFile, "calFile")
+
+## 3. Primary Stage Units
+h3("Primary Stage Units (PSUs)")
+h5("Only .csv!")
+helpText("In this dataset is contained ",br(),
+         "all needed information related", br(),
+         "to PSUs.")
+zipFileInput(id = "psu",label = "Upload PSU dataset", accept = (c("text/csv", ".csv")))
+psu<-callModule(zipFile, "psu")
+
+
+h3("Parameters selection")
+
+R2BEATInput(id = "updateStratInputs")
+
+numericInput("delta", "Average number of final units for each selection unit", value = 1, min=0, step = 1)
+
+numericInput("minimum", "Minimum number of SSUs to be selected in each PSU", value = 50, min=0, step = 1)
+
+numericInput("seed", "Set Seed",value = floor(runif(1, 1000,9999)), min=0, step = 1)
+
+```
+
+
+
+### Design and calibrated objects
+
+```{r}
+observe({
+  DES<<-des()
+  shiny::validate(need(DES, message = "Upload design object first!"))
+  callModule(R2BEATOutput1, "updateStratInputs", dataset = DES)
+})
+DT::renderDataTable(
+  {DES<<-des()
+   DES<<-DES$variables
+    })
+```
+
+### PSU dataset
+
+```{r}
+observe({
+  PSU<<-psu()
+  shiny::validate(need(PSU, message = "Upload .csv file first!"))
+  callModule(R2BEATOutput2, "updateStratInputs", dataset = PSU)
+})
+DT::renderDataTable(
+  {PSU<<-psu()
+    })
+
+```
+
+*** 
+
+
+After loading the data, and selecting the proper variables, click the start button. This will initiate the sampling design process, and present the results under the Sampling Properties section.
+<br>
+<br>
+
+```{r}
+# startButtonUI("start_design")
+conditionalPanel("input.methodselect==1",
+                 R2BEATInput_para("hotinputs")
+)
+# 
+
+str_all_inputs<-callModule(R2BEATOutput_para, "hotinputs",
+       dataset = DES,
+       domain_var = reactive(input$`updateStratInputs-domain_var`),
+       target_var = reactive(input$`updateStratInputs-target_var`)
+)
+
+# ## 1.1 collect variables in observer listening to start design optimization
+start_design<-reactiveVal(); 
+id_PSU<-reactiveVal();
+id_SSU<-reactiveVal();
+domain_var<-reactiveVal(); 
+target_var<-reactiveVal(); 
+strat_var<-reactiveVal();
+deff_var<-reactiveVal();
+frame_CV_in<<-reactiveVal();
+PSU_id<<-reactiveVal();
+stratum_var<-reactiveVal();
+mos_var<-reactiveVal();
+delta<-reactiveVal();
+minimum<-reactiveVal();
+seed<-reactiveVal();
+
+# ## 1.2. run the observer w. reactive vals
+observeEvent(input$`hotinputs-start_design`, {
+  start_design(input$`hotinputs-start_design`)
+  id_PSU(input$`updateStratInputs-id_PSU`)
+  id_SSU(input$`updateStratInputs-id_SSU`)
+  domain_var(input$`updateStratInputs-domain_var`)
+  target_var(input$`updateStratInputs-target_var`)
+  strat_var(input$`updateStratInputs-strat_var`)
+  deff_var(input$`updateStratInputs-deff_var`)
+  frame_CV_in(str_all_inputs$frame_CV_in())
+  PSU_id(input$`updateStratInputs-PSU_id`)
+  stratum_var(input$`updateStratInputs-stratum_var`)
+  mos_var(input$`updateStratInputs-mos_var`)
+  delta(input$delta)
+  minimum(input$minimum)
+  seed(input$seed)
+})
+
+observe({
+  frame_CV <<- frame_CV_in()
+  PSU_id <<- PSU_id
+  stratum_var <<- stratum_var
+  mos_var <<- mos_var
+  delta <<- delta
+  minimum <<- minimum
+  seed <<- seed
+})
+# 
+# 
+# ## 3. Run optimal design
+finalSample<<-callModule(R2BEATSRV, "start_design",
+                        dataset1 = des(),
+                        dataset2 = cal(),
+                        dataset3 = psu(),
+                        frame_CV_in = frame_CV,
+                        start_design = start_design,
+                        id_PSU = id_PSU,
+                        id_SSU = id_SSU,
+                        domain_var = domain_var,
+                        target_var = target_var,
+                        strat_var = strat_var,
+                        deff_var = deff_var,
+                        PSU_id = PSU_id,
+                        stratum_var = stratum_var,
+                        mos_var = mos_var,
+                        delta = delta,
+                        minimum = minimum,
+                        seed = seed
+)
+
+```
+
+
+
+### Final Sample
+
+```{r}
+observe({
+  # tab1 <<- finalSample$strata()
+  # tab2 <<- finalSample$rho()
+  # tab3 <<- finalSample$effst()
+  # tab4 <<- finalSample$iterations()
+  # tab5 <<- finalSample$sensitivity()
+  # tab6 <<- finalSample$expected()
+  tab <<- finalSample$allocation()
+})
+DT::renderDataTable({
+  # if(isolate(input$methodselect)==1){
+  tab
+  # } 
+})
+```
+
+
+### Download Sample
+
+```{r}
+observe({
+  tab <<- finalSample$sample()
+})
+DT::renderDataTable({
+  # if(isolate(input$methodselect)==1){
+  tab
+  # } 
+})
+```
+
+*** 
+
+If you are satisfied with the current solution, click the button and start the download.
+<br>
+<br>
+
+```{r}
+conditionalPanel("input.methodselect==1",
+                 downloadBigUI("dwl_sample", label = "Download Sample"))
+
+observe({
+    strata <- finalSample$strata()
+    rho <- finalSample$rho()
+    effst <- finalSample$effst()
+    iterations <- finalSample$iterations()
+    sensitivity <- finalSample$sensitivity()
+    expected <- finalSample$expected()
+    design <- finalSample$allocation()
+    sample <- finalSample$sample()
+    callModule(downloadBig, "dwl_sample", modid = "dwl_sample",
+               strata = strata,
+               rho = rho,
+               effst = effst,
+               iterations = iterations,
+               sensitivity = sensitivity,
+               expected = expected,
+               design = design,
+               sample = sample,
+               seed = reactive(input$sampSEED)
+               )
+  })
+
+
+```
+
+
+***
+
+
