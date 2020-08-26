@@ -16,7 +16,6 @@ Imports:
     R2BEAT,
     data.table,
     dplyr,
-    future,
     rmarkdown,
     readr,
     zip,
@@ -25,8 +24,6 @@ Imports:
     stringr,
     DT,
     sampling,
-    plotly,
-    doRNG,
     ReGenesees
 Depends:
     R (>= 3.5.0)
