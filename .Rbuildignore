@@ -1,2 +1,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^TwoStageSamplingApp\.Rcheck$
+^TwoStageSamplingApp.*\.tar\.gz$
+^TwoStageSamplingApp.*\.tgz$

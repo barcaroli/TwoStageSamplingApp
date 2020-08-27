@@ -1,6 +1,7 @@
 
 TwoStageSamplingApp<-function(launch.browser = T, quiet = T) {
   require(ReGenesees)
+  require(R2BEAT)
   require(sampling)
   require(magrittr)
   require(data.table)

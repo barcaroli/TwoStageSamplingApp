@@ -2,3 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
+TwoStageSamplingApp.Rcheck/
+TwoStageSamplingApp*.tar.gz
+TwoStageSamplingApp*.tgz
