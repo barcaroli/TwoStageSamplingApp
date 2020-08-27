@@ -1,15 +1,3 @@
-#' Shiny UI module for data download
-#'
-#' @description Designed to handle large frame files by a separated compilation and download process.
-#'
-#' @param id Namespace identifier
-#' @param label Download button label
-#'
-#' @return Download of Sample resources
-#'
-#' @importFrom shinyjs useShinyjs
-#'
-#' @export
 
 downloadBigUI<-function(id, label) {
   ## style
@@ -24,25 +12,6 @@ downloadBigUI<-function(id, label) {
                    style=invisibleButton)
   )
 }
-
-
-
-#' Shiny server module for download of 2 csv files in singel zip file
-#'
-#' @param input standard shiny input
-#' @param output standard shiny output
-#' @param session standard shiny session object
-#' @param frame_data frame for download (1. dataset)
-#' @param design design for download (2. dataset)
-#' @param sample the final sample
-#' @param seed the seed of the random process to reproduce (inlcude in file name)
-#' @param modid the id of namespace to be used in shinyjs
-#'
-#' @importFrom readr write_csv
-#' @importFrom shinyjs runjs
-#' @importFrom stringr str_remove_all
-#'
-#' @export
 
 downloadBig<-function(input, output, session,
                       strata,

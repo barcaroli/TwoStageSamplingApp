@@ -1,17 +1,3 @@
-#' Shiny UI module for R2BEAT variable selection
-#'
-#' @description This module creates the inputs and also updates them after dataset is
-#' available. Due to the construction of this module, the inputs are availble in the
-#' global environment under input$[id-ns(inputs)]. This means to reference i.e to
-#' the selectizeInput ns("strat_var_cont) with the hypotetical id "stratInputs" you have
-#' to use input$`stratInputs-strat_var_cont`.
-#'
-#' @param id Namespace identifier
-#'
-#' @return file with data.table of uploaded data
-#'
-#'
-#' @export
 R2BEATInput <- function(id) {
   # Create a namespace function using the provided id
   ns <- NS(id)
@@ -75,21 +61,6 @@ R2BEATInput <- function(id) {
     )
   )
 }
-
-#' Shiny server module for R2BEAT variable selection
-#'
-#' @description This module creates the inputs and also updates them after dataset is
-#' available. Due to the construction of this module, the inputs are availble in the
-#' global environment under input$[id-ns(inputs)]. This means to reference i.e to
-#' the selectizeInput ns("strat_var_cont) with the hypotetical id "stratInputs" you have
-#' to use input$`stratInputs-strat_var_cont`.
-#'
-#' @param input standard shiny input
-#' @param output standard shiny output
-#' @param session standard shiny session object
-#' @param dataset is the dataset provided by the user
-#'
-#' @export
 
 
 R2BEATOutput1 <- function(input, output, session, dataset) {

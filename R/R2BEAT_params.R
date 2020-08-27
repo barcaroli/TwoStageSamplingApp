@@ -8,21 +8,6 @@ R2BEATInput_para <- function(id) {
 }
 
 
-#' Shiny server module to create a rhandsontable for R2BEAT inputs
-#'
-#'
-#'
-#' @param input standard shiny input
-#' @param output standard shiny output
-#' @param session standard shiny session object
-#' @param dataset frame dataset used for the stratification
-#' @param domain_var the selected domain variables
-#' @param target_var the selected target variables
-#'
-#'
-#' @export
-#'
-#'
 R2BEATOutput_para <- function(input, output, session,
                                       dataset,
                                       domain_var,
