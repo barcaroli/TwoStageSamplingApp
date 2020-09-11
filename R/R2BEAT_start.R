@@ -236,7 +236,7 @@ R2BEATSRV<-function(input, output, session,
                    solutionsList$strata <- inp1$strata
                    solutionsList$rho <- inp1$rho
                    solutionsList$effst <- inp1$effst
-                   solutionsList$iterations <- allocation$iteractions
+                   solutionsList$iterations <- allocation$iterations
                    solutionsList$sensitivity <- allocation$sensitivity
                    solutionsList$expected <- allocation$expected
                    solutionsList$allocation <- allo
